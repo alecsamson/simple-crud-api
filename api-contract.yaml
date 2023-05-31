@@ -1,0 +1,97 @@
+swagger: "2.0"
+info:
+  version: "1.0.0"
+  title: Todo API
+paths:
+  /todos:
+    get:
+      summary: Get all todos
+      produces:
+        - application/json
+      responses:
+        200:
+          description: Successful operation
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Todo"
+    post:
+      summary: Create a new todo
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: todo
+          description: Todo object
+          schema:
+            $ref: "#/definitions/Todo"
+      responses:
+        201:
+          description: Todo created successfully
+          schema:
+            $ref: "#/definitions/Todo"
+  /todos/{id}:
+    get:
+      summary: Get a specific todo
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          description: Todo ID
+          required: true
+          type: string
+      responses:
+        200:
+          description: Successful operation
+          schema:
+            $ref: "#/definitions/Todo"
+        404:
+          description: Todo not found
+    put:
+      summary: Update a specific todo
+      consumes:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          description: Todo ID
+          required: true
+          type: string
+        - in: body
+          name: todo
+          description: Updated todo object
+          schema:
+            $ref: "#/definitions/Todo"
+      responses:
+        200:
+          description: Todo updated successfully
+          schema:
+            $ref: "#/definitions/Todo"
+        404:
+          description: Todo not found
+    delete:
+      summary: Delete a specific todo
+      parameters:
+        - in: path
+          name: id
+          description: Todo ID
+          required: true
+          type: string
+      responses:
+        204:
+          description: Todo deleted successfully
+        404:
+          description: Todo not found
+definitions:
+  Todo:
+    type: object
+    properties:
+      id:
+        type: string
+      title:
+        type: string
+      description:
+        type: string
+      completed:
+        type: boolean
