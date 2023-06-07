@@ -167,3 +167,42 @@ describe('Todo API', () => {
     });
   });
 });
+
+describe('PATCH /todos/{id}', () => {
+  it('should update a certain key of a specific todo by ID', async () => {
+    const initialTodo = {
+      title: 'Initial Todo',
+      description: 'Initial Description',
+      completed: true,
+    }
+
+    const patchedTodo = {
+      title: 'Patched Todo',
+    };
+
+    const insertedTodo = await postToDo(initialTodo);
+    const {id} = insertedTodo;
+
+    const response = await request(app)
+      .patch(`/todos/${id}`)
+      .send(patchedTodo);
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({
+      ...insertedTodo,
+      ...patchedTodo,
+    });
+  });
+
+  it('should return a 404 status for non-existent todo ID', async () => {
+    const patchedTodo = {
+      title: 'Patched Todo',
+    };
+
+    const response = await request(app)
+      .patch(`/todos/${"not_found"}`)
+      .send(patchedTodo);
+
+    expect(response.status).toBe(404);
+  });
+});

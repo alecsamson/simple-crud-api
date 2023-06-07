@@ -24,7 +24,7 @@ paths:
           name: todo
           description: Todo object
           schema:
-            $ref: "#/definitions/Todo"
+            $ref: "#/definitions/TodoPOST"
       responses:
         201:
           description: Todo created successfully
@@ -62,7 +62,7 @@ paths:
           name: todo
           description: Updated todo object
           schema:
-            $ref: "#/definitions/Todo"
+            $ref: "#/definitions/TodoPUT"
       responses:
         200:
           description: Todo updated successfully
@@ -70,6 +70,27 @@ paths:
             $ref: "#/definitions/Todo"
         404:
           description: Todo not found
+    patch: 
+      summary: Patch part of a specific todo
+      parameters:
+        - in: path
+          name: id
+          description: Todo ID
+          required: true
+          type: string
+        - in: body
+          name: todo
+          description: Patch todo object
+          schema:
+            $ref: "#/definitions/TodoPATCH"
+      responses:
+        200:
+          description: Todo patched successfully
+          schema:
+            $ref: "#/definitions/Todo"
+        404:
+          description: Todo not found
+
     delete:
       summary: Delete a specific todo
       parameters:
@@ -86,6 +107,11 @@ paths:
 definitions:
   Todo:
     type: object
+    required:
+      - id
+      - title
+      - description
+      - completed
     properties:
       id:
         type: string
@@ -95,3 +121,39 @@ definitions:
         type: string
       completed:
         type: boolean
+  TodoPUT: 
+    type: object
+    required:
+      - title
+      - description
+      - completed
+    properties:
+      title:
+        type: string
+      description:
+        type: string
+      completed:
+        type: boolean
+  TodoPOST: 
+    type: object
+    required:
+      - title
+      - description
+      - completed
+    properties:
+      title:
+        type: string
+      description:
+        type: string
+      completed:
+        type: boolean
+  TodoPATCH:
+    type: object
+    properties:
+      title:
+        type: string
+      description:
+        type: string
+      completed:
+        type: boolean
+
