@@ -156,7 +156,7 @@ describe('Todo API', () => {
       const response = await request(app).delete(`/todos/${createdTodoId}`);
       expect(response.status).toBe(204);
       const response2 = await request(app).get(`/todos/${createdTodoId}`);
-      expect(response.status).toBe(400);
+      expect(response2.status).toBe(400);
     });
 
     it('should return a 404 status for non-existent todo ID', async () => {
