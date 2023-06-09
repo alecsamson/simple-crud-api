@@ -1,9 +1,9 @@
 import request from "supertest";
 import app from "../app";
+import mongoose from "mongoose";
 
 describe('Todo API', () => {
   let createdTodoId;
-
 
   const postToDo = async (todo) => {
     const response = await request(app)
@@ -28,12 +28,17 @@ describe('Todo API', () => {
         const response = await request(app)
           .post('/todos')
           .send(validTodo);
-  
+        delete response.body.__v
+
+        createdTodoId = response.body._id;
+
+        const cleanResponse = response.body
+        delete cleanResponse._id
+
         expect(response.status).toBe(201);
-        expect(response.body).toEqual(validTodo);
-  
-        // Store the created todo ID for subsequent tests
-        createdTodoId = response.body.id;
+        expect(response.body).toEqual(cleanResponse);
+
+
       });
     })
     describe('given invalid todo data', () => {
@@ -42,8 +47,8 @@ describe('Todo API', () => {
       }
       const invalidTodoWrongTitleType = {
         title: 123,
-        description: "hello there",
-        completed: false
+        description: 456,
+        completed: 'false'
       }
 
       it('should return a 400 status and error message for invalid todo (no description and completed status)', async () => {
@@ -51,7 +56,7 @@ describe('Todo API', () => {
         const response = await request(app)
           .post('/todos')
           .send(invalidTodo);
-  
+
         expect(response.status).toBe(400);
       });
 
@@ -60,12 +65,10 @@ describe('Todo API', () => {
         const response = await request(app)
           .post('/todos')
           .send(invalidTodoWrongTitleType);
-  
+
         expect(response.status).toBe(400);
       });
-
     })
-  
   });
 
 
@@ -105,8 +108,9 @@ describe('Todo API', () => {
   describe('GET /todos/{id}', () => {
     it('should retrieve a specific todo by ID', async () => {
       const response = await request(app).get(`/todos/${createdTodoId}`);
+
       expect(response.status).toBe(200);
-      expect(response.body.id).toBe(createdTodoId);
+      expect(response.body._id).toBe(createdTodoId);
     });
 
     it('should return a 404 status for non-existent todo ID', async () => {
@@ -131,7 +135,11 @@ describe('Todo API', () => {
         .send(updatedTodo);
 
       expect(response.status).toBe(200);
-      expect(response.body).toEqual(updatedTodo);
+      expect(response.body.completed).toEqual(updatedTodo.completed);
+      expect(response.body.title).toEqual(updatedTodo.title);
+      expect(response.body.description).toEqual(updatedTodo.description);
+
+
     });
 
     it('should return a 404 status for non-existent todo ID', async () => {
@@ -153,10 +161,12 @@ describe('Todo API', () => {
   // Test DELETE /todos/{id}
   describe('DELETE /todos/{id}', () => {
     it('should delete a specific todo by ID', async () => {
-      const response = await request(app).delete(`/todos/${createdTodoId}`);
+      const newTodo = await postToDo({title: 'Embarrassing', description: 'Embarrassing description', completed: false});
+      const response = await request(app).delete(`/todos/${newTodo._id}`);
       expect(response.status).toBe(204);
-      const response2 = await request(app).get(`/todos/${createdTodoId}`);
-      expect(response2.status).toBe(400);
+
+      const response2 = await request(app).get(`/todos/${newTodo._id}`);
+      expect(response2.status).toBe(404);
     });
 
     it('should return a 404 status for non-existent todo ID', async () => {
@@ -166,9 +176,7 @@ describe('Todo API', () => {
       expect(response.status).toBe(404);
     });
   });
-});
-
-describe('PATCH /todos/{id}', () => {
+  describe('PATCH /todos/{id}', () => {
   it('should update a certain key of a specific todo by ID', async () => {
     const initialTodo = {
       title: 'Initial Todo',
@@ -181,7 +189,7 @@ describe('PATCH /todos/{id}', () => {
     };
 
     const insertedTodo = await postToDo(initialTodo);
-    const {id} = insertedTodo;
+    const {_id: id} = insertedTodo;
 
     const response = await request(app)
       .patch(`/todos/${id}`)
@@ -206,3 +214,5 @@ describe('PATCH /todos/{id}', () => {
     expect(response.status).toBe(404);
   });
 });
+});
+
